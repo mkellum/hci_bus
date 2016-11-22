@@ -1,0 +1,166 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Survey Animation</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {margin: 0;}
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+// Set these based on user scenario - or get from url?
+var name = "Sonic";
+var avatarImage = "assets/avatar.png";
+var redirectUrl = window.location.href;
+
+var busStartX = 757;
+var busStartY = 50;
+var busSlowX = 370;
+var busSlowY = 153;
+var busStopX = 327;
+var busStopY = 165;
+
+var avatarStartX = 635;
+var avatarStartY = 66;
+var avatarCornerX = 495;
+var avatarCornerY = 165;
+var avatarHitX = 370;
+var avatarHitY = 255;
+var avatarLandX = 220;
+var avatarLandY = 310;
+var avatarSlideX = 190;
+var avatarSlideY = 320;
+
+var avatarCornerTween;
+var avatarCenterTween;
+var avatarHitTween;
+var avatarSlideTween;
+
+var busFastTween;
+var busSlowTween;
+
+var bloodTween;
+
+var bus;
+var avatar;
+
+var text;
+var speech;
+
+var readyForNextEvent = false;
+var nextEvent = "walkToCorner";
+
+var game = new Phaser.Game(757,600,Phaser.CANVAS,'',{preload:preload,create:create,update:update});
+
+function preload() {
+	game.load.image('street', 'assets/street.png');
+	game.load.image('bus', 'assets/bus.png');
+	game.load.image('blood', 'assets/blood.png');
+	game.load.image('avatar', avatarImage);
+	game.load.image('edge', 'assets/edge.png');
+}
+
+function create() {
+	street = game.add.sprite(0, 0, 'street');
+	bus = game.add.sprite(busStartX, busStartY, 'bus');
+	blood = game.add.sprite(avatarSlideX, avatarSlideY, 'blood');
+	avatar = game.add.sprite(avatarStartX, avatarStartY, 'avatar');
+	bldg = game.add.sprite(704, 169, 'edge');
+
+	blood.anchor.setTo(0.5, 0.5);
+	blood.scale.set(0, 0);
+
+	avatar.anchor.setTo(0.5, 0.5);
+
+	avatarCornerTween = game.add.tween(avatar);
+	avatarCornerTween.to({x: avatarCornerX, y: avatarCornerY}, 2000);
+	avatarCornerTween.onComplete.add(function talkAtCorner() {
+		speech.setText(name + ": I'm in such a rush!\nI'll just cut through the center here...");
+		text.setText("Click to Continue");
+		nextEvent = "collide";
+		readyForNextEvent = true;
+	});
+
+	avatarCenterTween = game.add.tween(avatar);
+	avatarCenterTween.to({x: avatarHitX, y: avatarHitY}, 2000);
+
+	avatarHitTween = game.add.tween(avatar);
+	avatarHitTween.to({x: avatarLandX, y: avatarLandY, angle: -90}, 800);
+
+	avatarSlideTween = game.add.tween(avatar);
+	avatarSlideTween.to({x: avatarSlideX, y: avatarSlideY}, 400);
+
+	bloodTween = game.add.tween(blood.scale);
+	bloodTween.to({x: 0.5, y: 0.5}, 2000);
+	bloodTween.onComplete.add(function done() {
+		text.setText("Animation Complete\nClick to Proceed with Survey");
+		nextEvent = "redirect";
+		readyForNextEvent = true;
+	});
+
+	busFastTween = game.add.tween(bus);
+	busFastTween.to({x: busSlowX, y: busSlowY}, 2000)
+
+	busSlowTween = game.add.tween(bus);
+	busSlowTween.to({x: busStopX, y: busStopY}, 1000)
+
+	avatarCenterTween.chain(avatarHitTween);
+	avatarHitTween.chain(avatarSlideTween);
+	avatarSlideTween.chain(bloodTween);
+
+	busFastTween.chain(busSlowTween);
+
+	text = game.add.text(game.world.centerX, game.world.centerY + 190, "Click to Begin Animation");
+    text.anchor.set(0.5);
+    text.align = 'center';
+    text.font = 'Arial Black';
+    text.fontSize = 30;
+    text.fontWeight = 'bold';
+    text.stroke = '#000000';
+    text.strokeThickness = 6;
+    text.fill = '#FFFFFF';
+
+    speech = game.add.text(200, 75, "");
+    text.anchor.set(0.5);
+    text.align = 'center';
+    speech.font = 'Arial Black';
+    speech.fontSize = 16;
+    speech.fontWeight = 'bold';
+    speech.stroke = '#000000';
+    speech.strokeThickness = 2;
+    speech.fill = '#FFFFFF';
+
+    readyForNextEvent = true;
+}
+
+function update() {
+	if (readyForNextEvent && game.input.activePointer.isDown) {
+		readyForNextEvent = false;
+		window[nextEvent]();
+	}
+}
+
+function walkToCorner() {
+	text.setText("");
+	avatarCornerTween.start();
+}
+
+function collide() {
+	text.setText("");
+	speech.setText("");
+	avatarCenterTween.start();
+	busFastTween.start();
+}
+
+function redirect() {
+	window.location.href = redirectUrl;
+}
+
+</script>
+
+</body>
+</html>
