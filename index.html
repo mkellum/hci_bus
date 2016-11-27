@@ -13,7 +13,7 @@
 <script type="text/javascript">
 
 // Set these based on user scenario - or get from url?
-var name = "Sonic";
+var name = "Generic Male";
 var avatarImage = "assets/avatar.png";
 var redirectUrl = window.location.href;
 
@@ -27,7 +27,7 @@ var busStopY = 165;
 var avatarStartX = 635;
 var avatarStartY = 66;
 var avatarCornerX = 495;
-var avatarCornerY = 165;
+var avatarCornerY = 150;
 var avatarHitX = 370;
 var avatarHitY = 255;
 var avatarLandX = 220;
@@ -75,6 +75,7 @@ function create() {
 	blood.scale.set(0, 0);
 
 	avatar.anchor.setTo(0.5, 0.5);
+	avatar.scale.set(0.30, 0.30);
 
 	avatarCornerTween = game.add.tween(avatar);
 	avatarCornerTween.to({x: avatarCornerX, y: avatarCornerY}, 2000);
